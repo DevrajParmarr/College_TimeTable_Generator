@@ -1099,11 +1099,22 @@ function App() {
         } else if (sortBy === 'department') {
           aVal = a.department;
           bVal = b.department;
+        } else if (sortBy === 'joiningDate') {
+          aVal = new Date(a.dateOfJoining);
+          bVal = new Date(b.dateOfJoining);
         }
-        if (sortOrder === 'asc') {
-          return aVal.localeCompare(bVal);
+        if (sortBy === 'joiningDate') {
+          if (sortOrder === 'asc') {
+            return aVal - bVal;
+          } else {
+            return bVal - aVal;
+          }
         } else {
-          return bVal.localeCompare(aVal);
+          if (sortOrder === 'asc') {
+            return aVal.localeCompare(bVal);
+          } else {
+            return bVal.localeCompare(aVal);
+          }
         }
       });
 
@@ -1168,6 +1179,18 @@ function App() {
               sx={{ minWidth: 'auto', px: 2 }}
             >
               Department
+            </Button>
+            <Button
+              size="small"
+              variant={sortBy === 'joiningDate' ? 'contained' : 'outlined'}
+              onClick={() => {
+                setSortBy('joiningDate');
+                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+              }}
+              endIcon={sortBy === 'joiningDate' ? (sortOrder === 'asc' ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />) : null}
+              sx={{ minWidth: 'auto', px: 2 }}
+            >
+              Joining Date
             </Button>
           </Box>
           <Tooltip title="Add New Teacher">
