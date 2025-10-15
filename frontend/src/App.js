@@ -658,29 +658,32 @@ function App() {
         </Box>
 
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Tooltip title="Sort by Name">
-              <IconButton
-                onClick={() => {
-                  setSortBy('name');
-                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                }}
-                color={sortBy === 'name' ? 'primary' : 'default'}
-              >
-                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Sort by Code">
-              <IconButton
-                onClick={() => {
-                  setSortBy('code');
-                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                }}
-                color={sortBy === 'code' ? 'primary' : 'default'}
-              >
-                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
-              </IconButton>
-            </Tooltip>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ mr: 1, color: 'text.secondary' }}>Sort by:</Typography>
+            <Button
+              size="small"
+              variant={sortBy === 'name' ? 'contained' : 'outlined'}
+              onClick={() => {
+                setSortBy('name');
+                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+              }}
+              endIcon={sortBy === 'name' ? (sortOrder === 'asc' ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />) : null}
+              sx={{ minWidth: 'auto', px: 2 }}
+            >
+              Name
+            </Button>
+            <Button
+              size="small"
+              variant={sortBy === 'code' ? 'contained' : 'outlined'}
+              onClick={() => {
+                setSortBy('code');
+                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+              }}
+              endIcon={sortBy === 'code' ? (sortOrder === 'asc' ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />) : null}
+              sx={{ minWidth: 'auto', px: 2 }}
+            >
+              Code
+            </Button>
           </Box>
           <Tooltip title="Add New Branch">
             <Fab color="primary" size="small" onClick={handleAddBranch}>
@@ -839,40 +842,44 @@ function App() {
         </Box>
 
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Tooltip title="Sort by Name">
-              <IconButton
-                onClick={() => {
-                  setSortBy('name');
-                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                }}
-                color={sortBy === 'name' ? 'primary' : 'default'}
-              >
-                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Sort by Date">
-              <IconButton
-                onClick={() => {
-                  setSortBy('date');
-                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                }}
-                color={sortBy === 'date' ? 'primary' : 'default'}
-              >
-                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Sort by Students">
-              <IconButton
-                onClick={() => {
-                  setSortBy('students');
-                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                }}
-                color={sortBy === 'students' ? 'primary' : 'default'}
-              >
-                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
-              </IconButton>
-            </Tooltip>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ mr: 1, color: 'text.secondary' }}>Sort by:</Typography>
+            <Button
+              size="small"
+              variant={sortBy === 'name' ? 'contained' : 'outlined'}
+              onClick={() => {
+                setSortBy('name');
+                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+              }}
+              endIcon={sortBy === 'name' ? (sortOrder === 'asc' ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />) : null}
+              sx={{ minWidth: 'auto', px: 2 }}
+            >
+              Name
+            </Button>
+            <Button
+              size="small"
+              variant={sortBy === 'date' ? 'contained' : 'outlined'}
+              onClick={() => {
+                setSortBy('date');
+                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+              }}
+              endIcon={sortBy === 'date' ? (sortOrder === 'asc' ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />) : null}
+              sx={{ minWidth: 'auto', px: 2 }}
+            >
+              Date
+            </Button>
+            <Button
+              size="small"
+              variant={sortBy === 'students' ? 'contained' : 'outlined'}
+              onClick={() => {
+                setSortBy('students');
+                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+              }}
+              endIcon={sortBy === 'students' ? (sortOrder === 'asc' ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />) : null}
+              sx={{ minWidth: 'auto', px: 2 }}
+            >
+              Students
+            </Button>
           </Box>
           <Tooltip title="Add New Exam">
             <Fab color="primary" size="small" onClick={handleAddExam}>
@@ -1124,40 +1131,44 @@ function App() {
         </Box>
 
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Tooltip title="Sort by Name">
-              <IconButton
-                onClick={() => {
-                  setSortBy('name');
-                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                }}
-                color={sortBy === 'name' ? 'primary' : 'default'}
-              >
-                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Sort by Email">
-              <IconButton
-                onClick={() => {
-                  setSortBy('email');
-                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                }}
-                color={sortBy === 'email' ? 'primary' : 'default'}
-              >
-                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Sort by Department">
-              <IconButton
-                onClick={() => {
-                  setSortBy('department');
-                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                }}
-                color={sortBy === 'department' ? 'primary' : 'default'}
-              >
-                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
-              </IconButton>
-            </Tooltip>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ mr: 1, color: 'text.secondary' }}>Sort by:</Typography>
+            <Button
+              size="small"
+              variant={sortBy === 'name' ? 'contained' : 'outlined'}
+              onClick={() => {
+                setSortBy('name');
+                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+              }}
+              endIcon={sortBy === 'name' ? (sortOrder === 'asc' ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />) : null}
+              sx={{ minWidth: 'auto', px: 2 }}
+            >
+              Name
+            </Button>
+            <Button
+              size="small"
+              variant={sortBy === 'email' ? 'contained' : 'outlined'}
+              onClick={() => {
+                setSortBy('email');
+                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+              }}
+              endIcon={sortBy === 'email' ? (sortOrder === 'asc' ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />) : null}
+              sx={{ minWidth: 'auto', px: 2 }}
+            >
+              Email
+            </Button>
+            <Button
+              size="small"
+              variant={sortBy === 'department' ? 'contained' : 'outlined'}
+              onClick={() => {
+                setSortBy('department');
+                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+              }}
+              endIcon={sortBy === 'department' ? (sortOrder === 'asc' ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />) : null}
+              sx={{ minWidth: 'auto', px: 2 }}
+            >
+              Department
+            </Button>
           </Box>
           <Tooltip title="Add New Teacher">
             <Fab color="primary" size="small" onClick={handleAddTeacher}>
@@ -1393,40 +1404,44 @@ function App() {
         </Box>
 
         <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Tooltip title="Sort by Name">
-              <IconButton
-                onClick={() => {
-                  setSortBy('name');
-                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                }}
-                color={sortBy === 'name' ? 'primary' : 'default'}
-              >
-                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Sort by Capacity">
-              <IconButton
-                onClick={() => {
-                  setSortBy('capacity');
-                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                }}
-                color={sortBy === 'capacity' ? 'primary' : 'default'}
-              >
-                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Sort by Building">
-              <IconButton
-                onClick={() => {
-                  setSortBy('building');
-                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-                }}
-                color={sortBy === 'building' ? 'primary' : 'default'}
-              >
-                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
-              </IconButton>
-            </Tooltip>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Typography variant="body2" sx={{ mr: 1, color: 'text.secondary' }}>Sort by:</Typography>
+            <Button
+              size="small"
+              variant={sortBy === 'name' ? 'contained' : 'outlined'}
+              onClick={() => {
+                setSortBy('name');
+                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+              }}
+              endIcon={sortBy === 'name' ? (sortOrder === 'asc' ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />) : null}
+              sx={{ minWidth: 'auto', px: 2 }}
+            >
+              Name
+            </Button>
+            <Button
+              size="small"
+              variant={sortBy === 'capacity' ? 'contained' : 'outlined'}
+              onClick={() => {
+                setSortBy('capacity');
+                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+              }}
+              endIcon={sortBy === 'capacity' ? (sortOrder === 'asc' ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />) : null}
+              sx={{ minWidth: 'auto', px: 2 }}
+            >
+              Capacity
+            </Button>
+            <Button
+              size="small"
+              variant={sortBy === 'building' ? 'contained' : 'outlined'}
+              onClick={() => {
+                setSortBy('building');
+                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+              }}
+              endIcon={sortBy === 'building' ? (sortOrder === 'asc' ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />) : null}
+              sx={{ minWidth: 'auto', px: 2 }}
+            >
+              Building
+            </Button>
           </Box>
           <Tooltip title="Add New Room">
             <Fab color="primary" size="small" onClick={handleAddRoom}>
@@ -1739,26 +1754,6 @@ function App() {
         </>
       )}
 
-      {/* Footer */}
-      <Box
-        sx={{
-          mt: 6,
-          p: 3,
-          bgcolor: 'grey.100',
-          borderRadius: 2,
-          textAlign: 'center'
-        }}
-      >
-        <Typography variant="body2" color="text.secondary">
-          PDQA Project - Exam Room Allocation System
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-          Developed by: Devraj Parmar, Rahul Bamniya, Prakhar Dangolia, Prakhar Gupta, Vaibhav Singh
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Under the guidance of: Ashwini Sharma Ma'am
-        </Typography>
-      </Box>
 
       <Snackbar
         open={snackbar.open}
