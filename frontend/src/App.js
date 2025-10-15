@@ -49,16 +49,19 @@ import {
   Delete,
   Add,
   Search,
-  FilterList,
-  Dashboard,
   AdminPanelSettings,
   Save,
   Cancel,
   CheckCircle,
-  Error,
-  Info,
   ArrowUpward,
   ArrowDownward,
+  PlayArrow,
+  Settings,
+  TrendingUp,
+  Assignment,
+  Group,
+  MeetingRoom,
+  EventNote,
 } from '@mui/icons-material';
 import axios from 'axios';
 import './App.css';
@@ -1551,20 +1554,61 @@ function App() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Typography variant="h3" component="h1" gutterBottom align="center" sx={{ mb: 4 }}>
-        🧮 Exam Room Allocation System
-      </Typography>
+      {/* Hero Section */}
+      <Box
+        sx={{
+          textAlign: 'center',
+          mb: 6,
+          p: 4,
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          borderRadius: 3,
+          color: 'white',
+          boxShadow: 3
+        }}
+      >
+        <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
+          🧮 Exam Room Allocation System
+        </Typography>
+        <Typography variant="h6" sx={{ mb: 4, opacity: 0.9 }}>
+          Intelligent allocation of exam rooms and teacher assignments for educational institutions
+        </Typography>
 
-      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
-        <Button
-          variant="contained"
-          size="large"
-          onClick={fetchAllocation}
-          disabled={loading}
-          startIcon={loading ? <CircularProgress size={20} /> : <Refresh />}
-        >
-          {loading ? 'Allocating...' : 'Run Allocation'}
-        </Button>
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={fetchAllocation}
+            disabled={loading}
+            startIcon={loading ? <CircularProgress size={20} /> : <PlayArrow />}
+            sx={{
+              bgcolor: 'rgba(255,255,255,0.2)',
+              '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' },
+              px: 4,
+              py: 1.5
+            }}
+          >
+            {loading ? 'Allocating...' : 'Run Allocation'}
+          </Button>
+
+          <Button
+            variant="outlined"
+            size="large"
+            onClick={() => setActiveTab(1)}
+            startIcon={<Settings />}
+            sx={{
+              borderColor: 'rgba(255,255,255,0.5)',
+              color: 'white',
+              '&:hover': {
+                borderColor: 'white',
+                bgcolor: 'rgba(255,255,255,0.1)'
+              },
+              px: 4,
+              py: 1.5
+            }}
+          >
+            Admin Panel
+          </Button>
+        </Box>
       </Box>
 
       {error && (
@@ -1575,23 +1619,73 @@ function App() {
 
       {allocationData && (
         <>
-          {renderSummaryCards()}
+          {/* Quick Stats Dashboard */}
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+              <TrendingUp color="primary" />
+              Allocation Overview
+            </Typography>
+            {renderSummaryCards()}
+          </Box>
 
-          <Paper sx={{ mb: 4 }}>
-            <Tabs value={activeTab} onChange={handleTabChange} centered>
-              <Tab label="Allocation Results" />
-              <Tab label="Admin Panel" />
-            </Tabs>
+          <Paper sx={{ mb: 4, borderRadius: 2, overflow: 'hidden' }}>
+            <Box sx={{ bgcolor: 'primary.main', p: 2 }}>
+              <Tabs
+                value={activeTab}
+                onChange={handleTabChange}
+                centered
+                sx={{
+                  '& .MuiTab-root': { color: 'white', opacity: 0.7 },
+                  '& .MuiTab-root.Mui-selected': { color: 'white', opacity: 1 },
+                  '& .MuiTabs-indicator': { bgcolor: 'white' }
+                }}
+              >
+                <Tab
+                  label="Allocation Results"
+                  icon={<Assignment />}
+                  iconPosition="start"
+                  sx={{ minHeight: 64 }}
+                />
+                <Tab
+                  label="Admin Panel"
+                  icon={<AdminPanelSettings />}
+                  iconPosition="start"
+                  sx={{ minHeight: 64 }}
+                />
+              </Tabs>
+            </Box>
 
             <Box sx={{ p: 3 }}>
               {activeTab === 0 && (
                 <>
-                  <Tabs value={allocationSubTab} onChange={handleAllocationSubTabChange} centered>
-                    <Tab label="Room Allocations" />
-                    <Tab label="Teacher Assignments" />
-                    <Tab label="Duty Analysis" />
-                  </Tabs>
-                  <Box sx={{ mt: 2 }}>
+                  <Box sx={{ bgcolor: 'grey.50', p: 2, borderRadius: 1 }}>
+                    <Tabs
+                      value={allocationSubTab}
+                      onChange={handleAllocationSubTabChange}
+                      variant="fullWidth"
+                      sx={{
+                        '& .MuiTab-root': { minHeight: 48 },
+                        '& .MuiTabs-indicator': { height: 3 }
+                      }}
+                    >
+                      <Tab
+                        label="Room Allocations"
+                        icon={<MeetingRoom />}
+                        iconPosition="start"
+                      />
+                      <Tab
+                        label="Teacher Assignments"
+                        icon={<Group />}
+                        iconPosition="start"
+                      />
+                      <Tab
+                        label="Duty Analysis"
+                        icon={<Assessment />}
+                        iconPosition="start"
+                      />
+                    </Tabs>
+                  </Box>
+                  <Box sx={{ mt: 3, p: 2 }}>
                     {allocationSubTab === 0 && renderRoomAllocations()}
                     {allocationSubTab === 1 && renderTeacherAssignments()}
                     {allocationSubTab === 2 && renderTeacherDutyLoad()}
@@ -1600,13 +1694,39 @@ function App() {
               )}
               {activeTab === 1 && (
                 <>
-                  <Tabs value={adminTab} onChange={handleAdminTabChange} centered>
-                    <Tab label="Branches" />
-                    <Tab label="Rooms" />
-                    <Tab label="Exams" />
-                    <Tab label="Teachers" />
-                  </Tabs>
-                  <Box sx={{ mt: 2 }}>
+                  <Box sx={{ bgcolor: 'grey.50', p: 2, borderRadius: 1 }}>
+                    <Tabs
+                      value={adminTab}
+                      onChange={handleAdminTabChange}
+                      variant="fullWidth"
+                      sx={{
+                        '& .MuiTab-root': { minHeight: 48 },
+                        '& .MuiTabs-indicator': { height: 3 }
+                      }}
+                    >
+                      <Tab
+                        label="Branches"
+                        icon={<School />}
+                        iconPosition="start"
+                      />
+                      <Tab
+                        label="Rooms"
+                        icon={<MeetingRoom />}
+                        iconPosition="start"
+                      />
+                      <Tab
+                        label="Exams"
+                        icon={<EventNote />}
+                        iconPosition="start"
+                      />
+                      <Tab
+                        label="Teachers"
+                        icon={<Group />}
+                        iconPosition="start"
+                      />
+                    </Tabs>
+                  </Box>
+                  <Box sx={{ mt: 3, p: 2 }}>
                     {adminTab === 0 && renderBranchesManagement()}
                     {adminTab === 1 && renderRoomsManagement()}
                     {adminTab === 2 && renderExamsManagement()}
@@ -1619,6 +1739,27 @@ function App() {
         </>
       )}
 
+      {/* Footer */}
+      <Box
+        sx={{
+          mt: 6,
+          p: 3,
+          bgcolor: 'grey.100',
+          borderRadius: 2,
+          textAlign: 'center'
+        }}
+      >
+        <Typography variant="body2" color="text.secondary">
+          PDQA Project - Exam Room Allocation System
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          Developed by: Devraj Parmar, Rahul Bamniya, Prakhar Dangolia, Prakhar Gupta, Vaibhav Singh
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Under the guidance of: Ashwini Sharma Ma'am
+        </Typography>
+      </Box>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
@@ -1629,6 +1770,7 @@ function App() {
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           severity={snackbar.severity}
           sx={{ width: '100%' }}
+          variant="filled"
         >
           {snackbar.message}
         </Alert>
