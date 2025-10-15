@@ -57,6 +57,8 @@ import {
   CheckCircle,
   Error,
   Info,
+  ArrowUpward,
+  ArrowDownward,
 } from '@mui/icons-material';
 import axios from 'axios';
 import './App.css';
@@ -111,6 +113,8 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [sortBy, setSortBy] = useState('');
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -611,10 +615,21 @@ function App() {
   };
 
   const renderBranchesManagement = () => {
-    const filteredBranches = branches.filter(branch =>
-      branch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      branch.code.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredBranches = branches
+      .filter(branch =>
+        branch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        branch.code.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        if (!sortBy) return 0;
+        const aVal = sortBy === 'name' ? a.name : a.code;
+        const bVal = sortBy === 'name' ? b.name : b.code;
+        if (sortOrder === 'asc') {
+          return aVal.localeCompare(bVal);
+        } else {
+          return bVal.localeCompare(aVal);
+        }
+      });
 
     return (
       <Box>
@@ -639,7 +654,31 @@ function App() {
           />
         </Box>
 
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Tooltip title="Sort by Name">
+              <IconButton
+                onClick={() => {
+                  setSortBy('name');
+                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                }}
+                color={sortBy === 'name' ? 'primary' : 'default'}
+              >
+                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Sort by Code">
+              <IconButton
+                onClick={() => {
+                  setSortBy('code');
+                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                }}
+                color={sortBy === 'code' ? 'primary' : 'default'}
+              >
+                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
+              </IconButton>
+            </Tooltip>
+          </Box>
           <Tooltip title="Add New Branch">
             <Fab color="primary" size="small" onClick={handleAddBranch}>
               <Add />
@@ -747,11 +786,31 @@ function App() {
   };
 
   const renderExamsManagement = () => {
-    const filteredExams = exams.filter(exam =>
-      exam.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exam.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exam.department.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredExams = exams
+      .filter(exam =>
+        exam.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        exam.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        exam.department.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        if (!sortBy) return 0;
+        let aVal, bVal;
+        if (sortBy === 'name') {
+          aVal = a.name;
+          bVal = b.name;
+        } else if (sortBy === 'date') {
+          aVal = new Date(a.date);
+          bVal = new Date(b.date);
+        } else if (sortBy === 'students') {
+          aVal = a.eligibleStudents;
+          bVal = b.eligibleStudents;
+        }
+        if (sortOrder === 'asc') {
+          return aVal > bVal ? 1 : -1;
+        } else {
+          return aVal < bVal ? 1 : -1;
+        }
+      });
 
     return (
       <Box>
@@ -776,7 +835,42 @@ function App() {
           />
         </Box>
 
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Tooltip title="Sort by Name">
+              <IconButton
+                onClick={() => {
+                  setSortBy('name');
+                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                }}
+                color={sortBy === 'name' ? 'primary' : 'default'}
+              >
+                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Sort by Date">
+              <IconButton
+                onClick={() => {
+                  setSortBy('date');
+                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                }}
+                color={sortBy === 'date' ? 'primary' : 'default'}
+              >
+                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Sort by Students">
+              <IconButton
+                onClick={() => {
+                  setSortBy('students');
+                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                }}
+                color={sortBy === 'students' ? 'primary' : 'default'}
+              >
+                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
+              </IconButton>
+            </Tooltip>
+          </Box>
           <Tooltip title="Add New Exam">
             <Fab color="primary" size="small" onClick={handleAddExam}>
               <Add />
@@ -977,11 +1071,31 @@ function App() {
   };
 
   const renderTeachersManagement = () => {
-    const filteredTeachers = teachers.filter(teacher =>
-      teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.department.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredTeachers = teachers
+      .filter(teacher =>
+        teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        teacher.department.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        if (!sortBy) return 0;
+        let aVal, bVal;
+        if (sortBy === 'name') {
+          aVal = a.name;
+          bVal = b.name;
+        } else if (sortBy === 'email') {
+          aVal = a.email;
+          bVal = b.email;
+        } else if (sortBy === 'department') {
+          aVal = a.department;
+          bVal = b.department;
+        }
+        if (sortOrder === 'asc') {
+          return aVal.localeCompare(bVal);
+        } else {
+          return bVal.localeCompare(aVal);
+        }
+      });
 
     return (
       <Box>
@@ -1006,7 +1120,42 @@ function App() {
           />
         </Box>
 
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Tooltip title="Sort by Name">
+              <IconButton
+                onClick={() => {
+                  setSortBy('name');
+                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                }}
+                color={sortBy === 'name' ? 'primary' : 'default'}
+              >
+                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Sort by Email">
+              <IconButton
+                onClick={() => {
+                  setSortBy('email');
+                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                }}
+                color={sortBy === 'email' ? 'primary' : 'default'}
+              >
+                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Sort by Department">
+              <IconButton
+                onClick={() => {
+                  setSortBy('department');
+                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                }}
+                color={sortBy === 'department' ? 'primary' : 'default'}
+              >
+                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
+              </IconButton>
+            </Tooltip>
+          </Box>
           <Tooltip title="Add New Teacher">
             <Fab color="primary" size="small" onClick={handleAddTeacher}>
               <Add />
@@ -1192,10 +1341,30 @@ function App() {
   };
 
   const renderRoomsManagement = () => {
-    const filteredRooms = rooms.filter(room =>
-      room.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      room.building.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredRooms = rooms
+      .filter(room =>
+        room.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        room.building.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        if (!sortBy) return 0;
+        let aVal, bVal;
+        if (sortBy === 'name') {
+          aVal = a.name;
+          bVal = b.name;
+        } else if (sortBy === 'capacity') {
+          aVal = a.capacity;
+          bVal = b.capacity;
+        } else if (sortBy === 'building') {
+          aVal = a.building;
+          bVal = b.building;
+        }
+        if (sortOrder === 'asc') {
+          return aVal > bVal ? 1 : -1;
+        } else {
+          return aVal < bVal ? 1 : -1;
+        }
+      });
 
     return (
       <Box>
@@ -1220,7 +1389,42 @@ function App() {
           />
         </Box>
 
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Tooltip title="Sort by Name">
+              <IconButton
+                onClick={() => {
+                  setSortBy('name');
+                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                }}
+                color={sortBy === 'name' ? 'primary' : 'default'}
+              >
+                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Sort by Capacity">
+              <IconButton
+                onClick={() => {
+                  setSortBy('capacity');
+                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                }}
+                color={sortBy === 'capacity' ? 'primary' : 'default'}
+              >
+                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Sort by Building">
+              <IconButton
+                onClick={() => {
+                  setSortBy('building');
+                  setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+                }}
+                color={sortBy === 'building' ? 'primary' : 'default'}
+              >
+                {sortOrder === 'asc' ? <ArrowUpward /> : <ArrowDownward />}
+              </IconButton>
+            </Tooltip>
+          </Box>
           <Tooltip title="Add New Room">
             <Fab color="primary" size="small" onClick={handleAddRoom}>
               <Add />
