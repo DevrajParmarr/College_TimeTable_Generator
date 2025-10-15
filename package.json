@@ -1,0 +1,13 @@
+{
+  "name": "exam-room-allocation",
+  "version": "1.0.0",
+  "description": "Room allocation engine for exams",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
