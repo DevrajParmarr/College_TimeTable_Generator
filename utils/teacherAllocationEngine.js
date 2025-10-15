@@ -37,7 +37,7 @@ function allocateTeacherDuties(teachers, roomPlan, avgDuty) {
         date,
         shift,
         room: roomName,
-        teachers: ["No available teacher"],
+        teachers: ["Unassigned"],
       });
       return;
     }

@@ -133,6 +133,11 @@ app.delete('/api/teachers/:id', (req, res) => {
 
 app.post('/api/allocate', (req, res) => {
   try {
+    // Reset teacher assignments before new allocation
+    teachers.forEach(t => {
+      t.assignedDuties = [];
+    });
+
     // Step 1: Allocate rooms
     const roomAllocationResult = allocateRooms(rooms, exams);
     const roomPlan = roomAllocationResult.results || roomAllocationResult;

@@ -476,6 +476,7 @@ function App() {
                     <Chip
                       label={row.teachers}
                       size="small"
+                      color={row.teachers === "Unassigned" ? "error" : "default"}
                     />
                   )}
                 </TableCell>
