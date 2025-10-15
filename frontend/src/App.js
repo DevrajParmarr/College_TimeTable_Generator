@@ -28,6 +28,15 @@ import {
   DialogActions,
   TextField,
   IconButton,
+  InputAdornment,
+  Fab,
+  Tooltip,
+  Snackbar,
+  TablePagination,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import {
   School,
@@ -39,6 +48,15 @@ import {
   Edit,
   Delete,
   Add,
+  Search,
+  FilterList,
+  Dashboard,
+  AdminPanelSettings,
+  Save,
+  Cancel,
+  CheckCircle,
+  Error,
+  Info,
 } from '@mui/icons-material';
 import axios from 'axios';
 import './App.css';
@@ -89,6 +107,10 @@ function App() {
       friday: 'both'
     }
   });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -143,9 +165,11 @@ function App() {
     if (window.confirm('Are you sure you want to delete this branch?')) {
       try {
         await axios.delete(`${API_BASE_URL}/branches/${id}`);
+        setSnackbar({ open: true, message: 'Branch deleted successfully!', severity: 'success' });
         fetchAdminData();
       } catch (err) {
         console.error('Failed to delete branch:', err);
+        setSnackbar({ open: true, message: 'Failed to delete branch', severity: 'error' });
       }
     }
   };
@@ -154,13 +178,16 @@ function App() {
     try {
       if (editingBranch) {
         await axios.put(`${API_BASE_URL}/branches/${editingBranch.id}`, branchForm);
+        setSnackbar({ open: true, message: 'Branch updated successfully!', severity: 'success' });
       } else {
         await axios.post(`${API_BASE_URL}/branches`, branchForm);
+        setSnackbar({ open: true, message: 'Branch added successfully!', severity: 'success' });
       }
       setBranchDialogOpen(false);
       fetchAdminData();
     } catch (err) {
       console.error('Failed to save branch:', err);
+      setSnackbar({ open: true, message: 'Failed to save branch', severity: 'error' });
     }
   };
 
@@ -180,9 +207,11 @@ function App() {
     if (window.confirm('Are you sure you want to delete this room?')) {
       try {
         await axios.delete(`${API_BASE_URL}/rooms/${id}`);
+        setSnackbar({ open: true, message: 'Room deleted successfully!', severity: 'success' });
         fetchAdminData();
       } catch (err) {
         console.error('Failed to delete room:', err);
+        setSnackbar({ open: true, message: 'Failed to delete room', severity: 'error' });
       }
     }
   };
@@ -192,13 +221,16 @@ function App() {
       const formData = { ...roomForm, capacity: parseInt(roomForm.capacity) };
       if (editingRoom) {
         await axios.put(`${API_BASE_URL}/rooms/${editingRoom.id}`, formData);
+        setSnackbar({ open: true, message: 'Room updated successfully!', severity: 'success' });
       } else {
         await axios.post(`${API_BASE_URL}/rooms`, formData);
+        setSnackbar({ open: true, message: 'Room added successfully!', severity: 'success' });
       }
       setRoomDialogOpen(false);
       fetchAdminData();
     } catch (err) {
       console.error('Failed to save room:', err);
+      setSnackbar({ open: true, message: 'Failed to save room', severity: 'error' });
     }
   };
 
@@ -238,9 +270,11 @@ function App() {
     if (window.confirm('Are you sure you want to delete this exam?')) {
       try {
         await axios.delete(`${API_BASE_URL}/exams/${id}`);
+        setSnackbar({ open: true, message: 'Exam deleted successfully!', severity: 'success' });
         fetchAdminData();
       } catch (err) {
         console.error('Failed to delete exam:', err);
+        setSnackbar({ open: true, message: 'Failed to delete exam', severity: 'error' });
       }
     }
   };
@@ -254,13 +288,16 @@ function App() {
       };
       if (editingExam) {
         await axios.put(`${API_BASE_URL}/exams/${editingExam.id}`, formData);
+        setSnackbar({ open: true, message: 'Exam updated successfully!', severity: 'success' });
       } else {
         await axios.post(`${API_BASE_URL}/exams`, formData);
+        setSnackbar({ open: true, message: 'Exam added successfully!', severity: 'success' });
       }
       setExamDialogOpen(false);
       fetchAdminData();
     } catch (err) {
       console.error('Failed to save exam:', err);
+      setSnackbar({ open: true, message: 'Failed to save exam', severity: 'error' });
     }
   };
 
@@ -300,9 +337,11 @@ function App() {
     if (window.confirm('Are you sure you want to delete this teacher?')) {
       try {
         await axios.delete(`${API_BASE_URL}/teachers/${id}`);
+        setSnackbar({ open: true, message: 'Teacher deleted successfully!', severity: 'success' });
         fetchAdminData();
       } catch (err) {
         console.error('Failed to delete teacher:', err);
+        setSnackbar({ open: true, message: 'Failed to delete teacher', severity: 'error' });
       }
     }
   };
@@ -311,13 +350,16 @@ function App() {
     try {
       if (editingTeacher) {
         await axios.put(`${API_BASE_URL}/teachers/${editingTeacher.id}`, teacherForm);
+        setSnackbar({ open: true, message: 'Teacher updated successfully!', severity: 'success' });
       } else {
         await axios.post(`${API_BASE_URL}/teachers`, teacherForm);
+        setSnackbar({ open: true, message: 'Teacher added successfully!', severity: 'success' });
       }
       setTeacherDialogOpen(false);
       fetchAdminData();
     } catch (err) {
       console.error('Failed to save teacher:', err);
+      setSnackbar({ open: true, message: 'Failed to save teacher', severity: 'error' });
     }
   };
 
@@ -569,69 +611,134 @@ function App() {
   };
 
   const renderBranchesManagement = () => {
+    const filteredBranches = branches.filter(branch =>
+      branch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      branch.code.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
       <Box>
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6">Branches Management</Typography>
-          <Button variant="contained" startIcon={<Add />} onClick={handleAddBranch}>
-            Add Branch
-          </Button>
+        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <AdminPanelSettings color="primary" />
+            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>Branches Management</Typography>
+          </Box>
+          <TextField
+            size="small"
+            placeholder="Search branches..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ minWidth: 250 }}
+          />
         </Box>
-        <TableContainer component={Paper}>
+
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+          <Tooltip title="Add New Branch">
+            <Fab color="primary" size="small" onClick={handleAddBranch}>
+              <Add />
+            </Fab>
+          </Tooltip>
+        </Box>
+
+        <TableContainer component={Paper} elevation={2}>
           <Table>
             <TableHead>
-              <TableRow sx={{ bgcolor: 'grey.100' }}>
-                <TableCell><strong>ID</strong></TableCell>
-                <TableCell><strong>Name</strong></TableCell>
-                <TableCell><strong>Code</strong></TableCell>
-                <TableCell><strong>Actions</strong></TableCell>
+              <TableRow sx={{ bgcolor: 'primary.main' }}>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>ID</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Name</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Code</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {branches.map((branch) => (
-                <TableRow key={branch.id} hover>
+              {filteredBranches
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((branch) => (
+                <TableRow key={branch.id} hover sx={{ '&:hover': { bgcolor: 'grey.50' } }}>
                   <TableCell>{branch.id}</TableCell>
-                  <TableCell>{branch.name}</TableCell>
-                  <TableCell>{branch.code}</TableCell>
+                  <TableCell sx={{ fontWeight: 'medium' }}>{branch.name}</TableCell>
                   <TableCell>
-                    <IconButton onClick={() => handleEditBranch(branch)} color="primary">
-                      <Edit />
-                    </IconButton>
-                    <IconButton onClick={() => handleDeleteBranch(branch.id)} color="error">
-                      <Delete />
-                    </IconButton>
+                    <Chip label={branch.code} color="secondary" size="small" />
+                  </TableCell>
+                  <TableCell>
+                    <Tooltip title="Edit Branch">
+                      <IconButton onClick={() => handleEditBranch(branch)} color="primary" size="small">
+                        <Edit />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete Branch">
+                      <IconButton onClick={() => handleDeleteBranch(branch.id)} color="error" size="small">
+                        <Delete />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={filteredBranches.length}
+            page={page}
+            onPageChange={(event, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(event) => {
+              setRowsPerPage(parseInt(event.target.value, 10));
+              setPage(0);
+            }}
+            rowsPerPageOptions={[5, 10, 25]}
+          />
         </TableContainer>
 
         <Dialog open={branchDialogOpen} onClose={() => setBranchDialogOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle>{editingBranch ? 'Edit Branch' : 'Add Branch'}</DialogTitle>
-          <DialogContent>
+          <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {editingBranch ? <Edit color="primary" /> : <Add color="primary" />}
+            {editingBranch ? 'Edit Branch' : 'Add New Branch'}
+          </DialogTitle>
+          <DialogContent sx={{ pt: 2 }}>
             <TextField
               autoFocus
               margin="dense"
-              label="Name"
+              label="Branch Name"
               fullWidth
               variant="outlined"
               value={branchForm.name}
               onChange={(e) => setBranchForm({ ...branchForm, name: e.target.value })}
+              helperText="Enter the full name of the branch"
             />
             <TextField
               margin="dense"
-              label="Code"
+              label="Branch Code"
               fullWidth
               variant="outlined"
               value={branchForm.code}
               onChange={(e) => setBranchForm({ ...branchForm, code: e.target.value })}
+              helperText="Enter the abbreviated code (e.g., CSE, IT)"
+              inputProps={{ style: { textTransform: 'uppercase' } }}
             />
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setBranchDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveBranch} variant="contained">
-              {editingBranch ? 'Update' : 'Add'}
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button
+              onClick={() => setBranchDialogOpen(false)}
+              startIcon={<Cancel />}
+              color="inherit"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveBranch}
+              variant="contained"
+              startIcon={editingBranch ? <CheckCircle /> : <Save />}
+              color="primary"
+            >
+              {editingBranch ? 'Update Branch' : 'Save Branch'}
             </Button>
           </DialogActions>
         </Dialog>
@@ -640,37 +747,76 @@ function App() {
   };
 
   const renderExamsManagement = () => {
+    const filteredExams = exams.filter(exam =>
+      exam.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      exam.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      exam.department.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
       <Box>
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6">Exams Management</Typography>
-          <Button variant="contained" startIcon={<Add />} onClick={handleAddExam}>
-            Add Exam
-          </Button>
+        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Assessment color="primary" />
+            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>Exams Management</Typography>
+          </Box>
+          <TextField
+            size="small"
+            placeholder="Search exams..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ minWidth: 250 }}
+          />
         </Box>
-        <TableContainer component={Paper}>
+
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+          <Tooltip title="Add New Exam">
+            <Fab color="primary" size="small" onClick={handleAddExam}>
+              <Add />
+            </Fab>
+          </Tooltip>
+        </Box>
+
+        <TableContainer component={Paper} elevation={2}>
           <Table>
             <TableHead>
-              <TableRow sx={{ bgcolor: 'grey.100' }}>
-                <TableCell><strong>ID</strong></TableCell>
-                <TableCell><strong>Name</strong></TableCell>
-                <TableCell><strong>Department</strong></TableCell>
-                <TableCell><strong>Subject</strong></TableCell>
-                <TableCell><strong>Students</strong></TableCell>
-                <TableCell><strong>Date</strong></TableCell>
-                <TableCell><strong>Shift</strong></TableCell>
-                <TableCell><strong>Actions</strong></TableCell>
+              <TableRow sx={{ bgcolor: 'primary.main' }}>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>ID</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Name</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Department</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Subject</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Students</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Date</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Shift</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {exams.map((exam) => (
-                <TableRow key={exam.id} hover>
+              {filteredExams
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((exam) => (
+                <TableRow key={exam.id} hover sx={{ '&:hover': { bgcolor: 'grey.50' } }}>
                   <TableCell>{exam.id}</TableCell>
-                  <TableCell>{exam.name}</TableCell>
-                  <TableCell>{exam.department}</TableCell>
+                  <TableCell sx={{ fontWeight: 'medium' }}>{exam.name}</TableCell>
+                  <TableCell>
+                    <Chip label={exam.department} color="secondary" size="small" />
+                  </TableCell>
                   <TableCell>{exam.subject}</TableCell>
-                  <TableCell>{exam.eligibleStudents}</TableCell>
-                  <TableCell>{exam.date}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={`${exam.eligibleStudents} students`}
+                      color="info"
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell>{new Date(exam.date).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <Chip
                       label={exam.shift}
@@ -679,38 +825,66 @@ function App() {
                     />
                   </TableCell>
                   <TableCell>
-                    <IconButton onClick={() => handleEditExam(exam)} color="primary">
-                      <Edit />
-                    </IconButton>
-                    <IconButton onClick={() => handleDeleteExam(exam.id)} color="error">
-                      <Delete />
-                    </IconButton>
+                    <Tooltip title="Edit Exam">
+                      <IconButton onClick={() => handleEditExam(exam)} color="primary" size="small">
+                        <Edit />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete Exam">
+                      <IconButton onClick={() => handleDeleteExam(exam.id)} color="error" size="small">
+                        <Delete />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={filteredExams.length}
+            page={page}
+            onPageChange={(event, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(event) => {
+              setRowsPerPage(parseInt(event.target.value, 10));
+              setPage(0);
+            }}
+            rowsPerPageOptions={[5, 10, 25]}
+          />
         </TableContainer>
 
         <Dialog open={examDialogOpen} onClose={() => setExamDialogOpen(false)} maxWidth="md" fullWidth>
-          <DialogTitle>{editingExam ? 'Edit Exam' : 'Add Exam'}</DialogTitle>
-          <DialogContent>
+          <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {editingExam ? <Edit color="primary" /> : <Add color="primary" />}
+            {editingExam ? 'Edit Exam' : 'Add New Exam'}
+          </DialogTitle>
+          <DialogContent sx={{ pt: 2 }}>
             <Grid container spacing={2} sx={{ mt: 1 }}>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="Name"
+                  label="Exam Name"
                   value={examForm.name}
                   onChange={(e) => setExamForm({ ...examForm, name: e.target.value })}
+                  helperText="Enter the exam name"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Department"
-                  value={examForm.department}
-                  onChange={(e) => setExamForm({ ...examForm, department: e.target.value })}
-                />
+                <FormControl fullWidth>
+                  <InputLabel>Department</InputLabel>
+                  <Select
+                    value={examForm.department}
+                    onChange={(e) => setExamForm({ ...examForm, department: e.target.value })}
+                    label="Department"
+                  >
+                    {branches.map((branch) => (
+                      <MenuItem key={branch.code} value={branch.code}>
+                        {branch.name} ({branch.code})
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -718,6 +892,7 @@ function App() {
                   label="Subject"
                   value={examForm.subject}
                   onChange={(e) => setExamForm({ ...examForm, subject: e.target.value })}
+                  helperText="Subject name or code"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -727,30 +902,33 @@ function App() {
                   type="number"
                   value={examForm.eligibleStudents}
                   onChange={(e) => setExamForm({ ...examForm, eligibleStudents: e.target.value })}
+                  helperText="Number of students taking this exam"
+                  inputProps={{ min: 1 }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="Date"
+                  label="Exam Date"
                   type="date"
                   InputLabelProps={{ shrink: true }}
                   value={examForm.date}
                   onChange={(e) => setExamForm({ ...examForm, date: e.target.value })}
+                  helperText="Select the exam date"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Shift"
-                  value={examForm.shift}
-                  onChange={(e) => setExamForm({ ...examForm, shift: e.target.value })}
-                  SelectProps={{ native: true }}
-                >
-                  <option value="morning">Morning</option>
-                  <option value="afternoon">Afternoon</option>
-                </TextField>
+                <FormControl fullWidth>
+                  <InputLabel>Shift</InputLabel>
+                  <Select
+                    value={examForm.shift}
+                    onChange={(e) => setExamForm({ ...examForm, shift: e.target.value })}
+                    label="Shift"
+                  >
+                    <MenuItem value="morning">Morning (9:00 - 12:00)</MenuItem>
+                    <MenuItem value="afternoon">Afternoon (14:00 - 17:00)</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -760,6 +938,7 @@ function App() {
                   InputLabelProps={{ shrink: true }}
                   value={examForm.startTime}
                   onChange={(e) => setExamForm({ ...examForm, startTime: e.target.value })}
+                  helperText="Exam start time"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -770,14 +949,26 @@ function App() {
                   InputLabelProps={{ shrink: true }}
                   value={examForm.endTime}
                   onChange={(e) => setExamForm({ ...examForm, endTime: e.target.value })}
+                  helperText="Exam end time"
                 />
               </Grid>
             </Grid>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setExamDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveExam} variant="contained">
-              {editingExam ? 'Update' : 'Add'}
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button
+              onClick={() => setExamDialogOpen(false)}
+              startIcon={<Cancel />}
+              color="inherit"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveExam}
+              variant="contained"
+              startIcon={editingExam ? <CheckCircle /> : <Save />}
+              color="primary"
+            >
+              {editingExam ? 'Update Exam' : 'Save Exam'}
             </Button>
           </DialogActions>
         </Dialog>
@@ -786,33 +977,67 @@ function App() {
   };
 
   const renderTeachersManagement = () => {
+    const filteredTeachers = teachers.filter(teacher =>
+      teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      teacher.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      teacher.department.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
       <Box>
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6">Teachers Management</Typography>
-          <Button variant="contained" startIcon={<Add />} onClick={handleAddTeacher}>
-            Add Teacher
-          </Button>
+        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Person color="primary" />
+            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>Teachers Management</Typography>
+          </Box>
+          <TextField
+            size="small"
+            placeholder="Search teachers..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ minWidth: 250 }}
+          />
         </Box>
-        <TableContainer component={Paper}>
+
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+          <Tooltip title="Add New Teacher">
+            <Fab color="primary" size="small" onClick={handleAddTeacher}>
+              <Add />
+            </Fab>
+          </Tooltip>
+        </Box>
+
+        <TableContainer component={Paper} elevation={2}>
           <Table>
             <TableHead>
-              <TableRow sx={{ bgcolor: 'grey.100' }}>
-                <TableCell><strong>ID</strong></TableCell>
-                <TableCell><strong>Name</strong></TableCell>
-                <TableCell><strong>Email</strong></TableCell>
-                <TableCell><strong>Department</strong></TableCell>
-                <TableCell><strong>Experience</strong></TableCell>
-                <TableCell><strong>Actions</strong></TableCell>
+              <TableRow sx={{ bgcolor: 'primary.main' }}>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>ID</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Name</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Email</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Department</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Experience</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Joining Date</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {teachers.map((teacher) => (
-                <TableRow key={teacher.id} hover>
+              {filteredTeachers
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((teacher) => (
+                <TableRow key={teacher.id} hover sx={{ '&:hover': { bgcolor: 'grey.50' } }}>
                   <TableCell>{teacher.id}</TableCell>
-                  <TableCell>{teacher.name}</TableCell>
-                  <TableCell>{teacher.email}</TableCell>
-                  <TableCell>{teacher.department}</TableCell>
+                  <TableCell sx={{ fontWeight: 'medium' }}>{teacher.name}</TableCell>
+                  <TableCell sx={{ fontSize: '0.875rem' }}>{teacher.email}</TableCell>
+                  <TableCell>
+                    <Chip label={teacher.department} variant="outlined" size="small" />
+                  </TableCell>
                   <TableCell>
                     <Chip
                       label={teacher.experience}
@@ -820,48 +1045,78 @@ function App() {
                       size="small"
                     />
                   </TableCell>
+                  <TableCell>{new Date(teacher.dateOfJoining).toLocaleDateString()}</TableCell>
                   <TableCell>
-                    <IconButton onClick={() => handleEditTeacher(teacher)} color="primary">
-                      <Edit />
-                    </IconButton>
-                    <IconButton onClick={() => handleDeleteTeacher(teacher.id)} color="error">
-                      <Delete />
-                    </IconButton>
+                    <Tooltip title="Edit Teacher">
+                      <IconButton onClick={() => handleEditTeacher(teacher)} color="primary" size="small">
+                        <Edit />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete Teacher">
+                      <IconButton onClick={() => handleDeleteTeacher(teacher.id)} color="error" size="small">
+                        <Delete />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={filteredTeachers.length}
+            page={page}
+            onPageChange={(event, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(event) => {
+              setRowsPerPage(parseInt(event.target.value, 10));
+              setPage(0);
+            }}
+            rowsPerPageOptions={[5, 10, 25]}
+          />
         </TableContainer>
 
         <Dialog open={teacherDialogOpen} onClose={() => setTeacherDialogOpen(false)} maxWidth="md" fullWidth>
-          <DialogTitle>{editingTeacher ? 'Edit Teacher' : 'Add Teacher'}</DialogTitle>
-          <DialogContent>
+          <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {editingTeacher ? <Edit color="primary" /> : <Add color="primary" />}
+            {editingTeacher ? 'Edit Teacher' : 'Add New Teacher'}
+          </DialogTitle>
+          <DialogContent sx={{ pt: 2 }}>
             <Grid container spacing={2} sx={{ mt: 1 }}>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="Name"
+                  label="Full Name"
                   value={teacherForm.name}
                   onChange={(e) => setTeacherForm({ ...teacherForm, name: e.target.value })}
+                  helperText="Enter the teacher's full name"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="Email"
+                  label="Email Address"
                   type="email"
                   value={teacherForm.email}
                   onChange={(e) => setTeacherForm({ ...teacherForm, email: e.target.value })}
+                  helperText="Official email address"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Department"
-                  value={teacherForm.department}
-                  onChange={(e) => setTeacherForm({ ...teacherForm, department: e.target.value })}
-                />
+                <FormControl fullWidth>
+                  <InputLabel>Department</InputLabel>
+                  <Select
+                    value={teacherForm.department}
+                    onChange={(e) => setTeacherForm({ ...teacherForm, department: e.target.value })}
+                    label="Department"
+                  >
+                    {branches.map((branch) => (
+                      <MenuItem key={branch.code} value={branch.name}>
+                        {branch.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -871,27 +1126,64 @@ function App() {
                   InputLabelProps={{ shrink: true }}
                   value={teacherForm.dateOfJoining}
                   onChange={(e) => setTeacherForm({ ...teacherForm, dateOfJoining: e.target.value })}
+                  helperText="When did the teacher join?"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Experience"
-                  value={teacherForm.experience}
-                  onChange={(e) => setTeacherForm({ ...teacherForm, experience: e.target.value })}
-                  SelectProps={{ native: true }}
-                >
-                  <option value="new">New</option>
-                  <option value="experienced">Experienced</option>
-                </TextField>
+                <FormControl fullWidth>
+                  <InputLabel>Experience Level</InputLabel>
+                  <Select
+                    value={teacherForm.experience}
+                    onChange={(e) => setTeacherForm({ ...teacherForm, experience: e.target.value })}
+                    label="Experience Level"
+                  >
+                    <MenuItem value="new">New Teacher</MenuItem>
+                    <MenuItem value="experienced">Experienced Teacher</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
             </Grid>
+            <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>Weekly Availability</Typography>
+            <Grid container spacing={2}>
+              {['monday', 'tuesday', 'wednesday', 'thursday', 'friday'].map((day) => (
+                <Grid item xs={12} sm={6} md={4} key={day}>
+                  <FormControl fullWidth size="small">
+                    <InputLabel sx={{ textTransform: 'capitalize' }}>{day}</InputLabel>
+                    <Select
+                      value={teacherForm.weeklyAvailability[day]}
+                      onChange={(e) => setTeacherForm({
+                        ...teacherForm,
+                        weeklyAvailability: {
+                          ...teacherForm.weeklyAvailability,
+                          [day]: e.target.value
+                        }
+                      })}
+                      label={day.charAt(0).toUpperCase() + day.slice(1)}
+                    >
+                      <MenuItem value="morning">Morning Only</MenuItem>
+                      <MenuItem value="afternoon">Afternoon Only</MenuItem>
+                      <MenuItem value="both">Both Shifts</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+              ))}
+            </Grid>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setTeacherDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveTeacher} variant="contained">
-              {editingTeacher ? 'Update' : 'Add'}
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button
+              onClick={() => setTeacherDialogOpen(false)}
+              startIcon={<Cancel />}
+              color="inherit"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveTeacher}
+              variant="contained"
+              startIcon={editingTeacher ? <CheckCircle /> : <Save />}
+              color="primary"
+            >
+              {editingTeacher ? 'Update Teacher' : 'Save Teacher'}
             </Button>
           </DialogActions>
         </Dialog>
@@ -900,57 +1192,115 @@ function App() {
   };
 
   const renderRoomsManagement = () => {
+    const filteredRooms = rooms.filter(room =>
+      room.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      room.building.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
       <Box>
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6">Rooms Management</Typography>
-          <Button variant="contained" startIcon={<Add />} onClick={handleAddRoom}>
-            Add Room
-          </Button>
+        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Room color="primary" />
+            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>Rooms Management</Typography>
+          </Box>
+          <TextField
+            size="small"
+            placeholder="Search rooms..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ minWidth: 250 }}
+          />
         </Box>
-        <TableContainer component={Paper}>
+
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+          <Tooltip title="Add New Room">
+            <Fab color="primary" size="small" onClick={handleAddRoom}>
+              <Add />
+            </Fab>
+          </Tooltip>
+        </Box>
+
+        <TableContainer component={Paper} elevation={2}>
           <Table>
             <TableHead>
-              <TableRow sx={{ bgcolor: 'grey.100' }}>
-                <TableCell><strong>ID</strong></TableCell>
-                <TableCell><strong>Name</strong></TableCell>
-                <TableCell><strong>Capacity</strong></TableCell>
-                <TableCell><strong>Building</strong></TableCell>
-                <TableCell><strong>Actions</strong></TableCell>
+              <TableRow sx={{ bgcolor: 'primary.main' }}>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>ID</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Name</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Capacity</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Building</TableCell>
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {rooms.map((room) => (
-                <TableRow key={room.id} hover>
+              {filteredRooms
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((room) => (
+                <TableRow key={room.id} hover sx={{ '&:hover': { bgcolor: 'grey.50' } }}>
                   <TableCell>{room.id}</TableCell>
-                  <TableCell>{room.name}</TableCell>
-                  <TableCell>{room.capacity}</TableCell>
-                  <TableCell>{room.building}</TableCell>
+                  <TableCell sx={{ fontWeight: 'medium' }}>{room.name}</TableCell>
                   <TableCell>
-                    <IconButton onClick={() => handleEditRoom(room)} color="primary">
-                      <Edit />
-                    </IconButton>
-                    <IconButton onClick={() => handleDeleteRoom(room.id)} color="error">
-                      <Delete />
-                    </IconButton>
+                    <Chip
+                      label={`${room.capacity} seats`}
+                      color={room.capacity > 60 ? 'success' : room.capacity > 40 ? 'warning' : 'error'}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip label={room.building} variant="outlined" size="small" />
+                  </TableCell>
+                  <TableCell>
+                    <Tooltip title="Edit Room">
+                      <IconButton onClick={() => handleEditRoom(room)} color="primary" size="small">
+                        <Edit />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete Room">
+                      <IconButton onClick={() => handleDeleteRoom(room.id)} color="error" size="small">
+                        <Delete />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={filteredRooms.length}
+            page={page}
+            onPageChange={(event, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(event) => {
+              setRowsPerPage(parseInt(event.target.value, 10));
+              setPage(0);
+            }}
+            rowsPerPageOptions={[5, 10, 25]}
+          />
         </TableContainer>
 
         <Dialog open={roomDialogOpen} onClose={() => setRoomDialogOpen(false)} maxWidth="sm" fullWidth>
-          <DialogTitle>{editingRoom ? 'Edit Room' : 'Add Room'}</DialogTitle>
-          <DialogContent>
+          <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {editingRoom ? <Edit color="primary" /> : <Add color="primary" />}
+            {editingRoom ? 'Edit Room' : 'Add New Room'}
+          </DialogTitle>
+          <DialogContent sx={{ pt: 2 }}>
             <TextField
               autoFocus
               margin="dense"
-              label="Name"
+              label="Room Name"
               fullWidth
               variant="outlined"
               value={roomForm.name}
               onChange={(e) => setRoomForm({ ...roomForm, name: e.target.value })}
+              helperText="Enter the room name (e.g., Room 101)"
             />
             <TextField
               margin="dense"
@@ -960,6 +1310,8 @@ function App() {
               variant="outlined"
               value={roomForm.capacity}
               onChange={(e) => setRoomForm({ ...roomForm, capacity: e.target.value })}
+              helperText="Maximum number of students the room can accommodate"
+              inputProps={{ min: 1, max: 200 }}
             />
             <TextField
               margin="dense"
@@ -968,12 +1320,24 @@ function App() {
               variant="outlined"
               value={roomForm.building}
               onChange={(e) => setRoomForm({ ...roomForm, building: e.target.value })}
+              helperText="Building name or block (e.g., Block A)"
             />
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setRoomDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveRoom} variant="contained">
-              {editingRoom ? 'Update' : 'Add'}
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button
+              onClick={() => setRoomDialogOpen(false)}
+              startIcon={<Cancel />}
+              color="inherit"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveRoom}
+              variant="contained"
+              startIcon={editingRoom ? <CheckCircle /> : <Save />}
+              color="primary"
+            >
+              {editingRoom ? 'Update Room' : 'Save Room'}
             </Button>
           </DialogActions>
         </Dialog>
@@ -1050,6 +1414,21 @@ function App() {
           </Paper>
         </>
       )}
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
