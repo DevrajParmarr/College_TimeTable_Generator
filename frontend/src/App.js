@@ -465,14 +465,19 @@ function App() {
                 </TableCell>
                 <TableCell>{row.room}</TableCell>
                 <TableCell>
-                  {row.teachers.split(', ').map((teacher, i) => (
+                  {Array.isArray(row.teachers) ? row.teachers.map((teacher, i) => (
                     <Chip
                       key={i}
                       label={teacher}
                       size="small"
                       sx={{ mr: 0.5, mb: 0.5 }}
                     />
-                  ))}
+                  )) : (
+                    <Chip
+                      label={row.teachers}
+                      size="small"
+                    />
+                  )}
                 </TableCell>
               </TableRow>
             ))}
