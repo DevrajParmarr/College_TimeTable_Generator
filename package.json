@@ -1,13 +1,39 @@
 {
   "name": "exam-room-allocation",
   "version": "1.0.0",
-  "description": "Room allocation engine for exams",
-  "main": "app.js",
+  "description": "Room allocation engine for exams with web interface",
+  "main": "server.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build": "cd frontend && npm run build",
+    "install-client": "cd frontend && npm install",
+    "heroku-postbuild": "npm run install-client && npm run build",
+    "client": "cd frontend && npm start",
+    "dev-full": "concurrently \"npm run dev\" \"npm run client\""
   },
-  "keywords": [],
+  "keywords": [
+    "exam",
+    "allocation",
+    "room",
+    "teacher",
+    "university"
+  ],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^7.3.4",
+    "@mui/material": "^7.3.4",
+    "axios": "^1.12.2",
+    "concurrently": "^9.2.1",
+    "console-table-printer": "^2.11.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
 }
