@@ -44,7 +44,6 @@ import {
   Room,
   Assessment,
   ExpandMore,
-  Refresh,
   Edit,
   Delete,
   Add,
@@ -70,7 +69,7 @@ function App() {
   const [allocationData, setAllocationData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(1);
   const [allocationSubTab, setAllocationSubTab] = useState(0);
   const [adminTab, setAdminTab] = useState(0);
   const [branches, setBranches] = useState([]);
@@ -119,7 +118,7 @@ function App() {
   const [sortOrder, setSortOrder] = useState('asc');
   const [sortBy, setSortBy] = useState('');
 
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  const API_BASE_URL = process.env.REACT_APP_API_URL || '/.netlify/functions/api';
 
   const fetchAllocation = async () => {
     setLoading(true);
@@ -127,6 +126,7 @@ function App() {
     try {
       const response = await axios.post(`${API_BASE_URL}/allocate`);
       setAllocationData(response.data.data);
+      setActiveTab(0); // Switch to Allocation Results tab after successful allocation
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch allocation data');
     } finally {
@@ -135,7 +135,6 @@ function App() {
   };
 
   useEffect(() => {
-    fetchAllocation();
     fetchAdminData();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -1655,127 +1654,124 @@ function App() {
         </Alert>
       )}
 
-      {allocationData && (
-        <>
-          {/* Quick Stats Dashboard */}
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-              <TrendingUp color="primary" />
-              Allocation Overview
-            </Typography>
-            {renderSummaryCards()}
-          </Box>
+      <Paper sx={{ mb: 4, borderRadius: 2, overflow: 'hidden' }}>
+        <Box sx={{ bgcolor: 'primary.main', p: 2 }}>
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            centered
+            sx={{
+              '& .MuiTab-root': { color: 'white', opacity: 0.7 },
+              '& .MuiTab-root.Mui-selected': { color: 'white', opacity: 1 },
+              '& .MuiTabs-indicator': { bgcolor: 'white' }
+            }}
+          >
+            <Tab
+              label="Allocation Results"
+              icon={<Assignment />}
+              iconPosition="start"
+              sx={{ minHeight: 64 }}
+              disabled={!allocationData}
+            />
+            <Tab
+              label="Admin Panel"
+              icon={<AdminPanelSettings />}
+              iconPosition="start"
+              sx={{ minHeight: 64 }}
+            />
+          </Tabs>
+        </Box>
 
-          <Paper sx={{ mb: 4, borderRadius: 2, overflow: 'hidden' }}>
-            <Box sx={{ bgcolor: 'primary.main', p: 2 }}>
-              <Tabs
-                value={activeTab}
-                onChange={handleTabChange}
-                centered
-                sx={{
-                  '& .MuiTab-root': { color: 'white', opacity: 0.7 },
-                  '& .MuiTab-root.Mui-selected': { color: 'white', opacity: 1 },
-                  '& .MuiTabs-indicator': { bgcolor: 'white' }
-                }}
-              >
-                <Tab
-                  label="Allocation Results"
-                  icon={<Assignment />}
-                  iconPosition="start"
-                  sx={{ minHeight: 64 }}
-                />
-                <Tab
-                  label="Admin Panel"
-                  icon={<AdminPanelSettings />}
-                  iconPosition="start"
-                  sx={{ minHeight: 64 }}
-                />
-              </Tabs>
-            </Box>
+        <Box sx={{ p: 3 }}>
+          {activeTab === 0 && allocationData && (
+            <>
+              {/* Quick Stats Dashboard */}
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                  <TrendingUp color="primary" />
+                  Allocation Overview
+                </Typography>
+                {renderSummaryCards()}
+              </Box>
 
-            <Box sx={{ p: 3 }}>
-              {activeTab === 0 && (
-                <>
-                  <Box sx={{ bgcolor: 'grey.50', p: 2, borderRadius: 1 }}>
-                    <Tabs
-                      value={allocationSubTab}
-                      onChange={handleAllocationSubTabChange}
-                      variant="fullWidth"
-                      sx={{
-                        '& .MuiTab-root': { minHeight: 48 },
-                        '& .MuiTabs-indicator': { height: 3 }
-                      }}
-                    >
-                      <Tab
-                        label="Room Allocations"
-                        icon={<MeetingRoom />}
-                        iconPosition="start"
-                      />
-                      <Tab
-                        label="Teacher Assignments"
-                        icon={<Group />}
-                        iconPosition="start"
-                      />
-                      <Tab
-                        label="Duty Analysis"
-                        icon={<Assessment />}
-                        iconPosition="start"
-                      />
-                    </Tabs>
-                  </Box>
-                  <Box sx={{ mt: 3, p: 2 }}>
-                    {allocationSubTab === 0 && renderRoomAllocations()}
-                    {allocationSubTab === 1 && renderTeacherAssignments()}
-                    {allocationSubTab === 2 && renderTeacherDutyLoad()}
-                  </Box>
-                </>
-              )}
-              {activeTab === 1 && (
-                <>
-                  <Box sx={{ bgcolor: 'grey.50', p: 2, borderRadius: 1 }}>
-                    <Tabs
-                      value={adminTab}
-                      onChange={handleAdminTabChange}
-                      variant="fullWidth"
-                      sx={{
-                        '& .MuiTab-root': { minHeight: 48 },
-                        '& .MuiTabs-indicator': { height: 3 }
-                      }}
-                    >
-                      <Tab
-                        label="Branches"
-                        icon={<School />}
-                        iconPosition="start"
-                      />
-                      <Tab
-                        label="Rooms"
-                        icon={<MeetingRoom />}
-                        iconPosition="start"
-                      />
-                      <Tab
-                        label="Exams"
-                        icon={<EventNote />}
-                        iconPosition="start"
-                      />
-                      <Tab
-                        label="Teachers"
-                        icon={<Group />}
-                        iconPosition="start"
-                      />
-                    </Tabs>
-                  </Box>
-                  <Box sx={{ mt: 3, p: 2 }}>
-                    {adminTab === 0 && renderBranchesManagement()}
-                    {adminTab === 1 && renderRoomsManagement()}
-                    {adminTab === 2 && renderExamsManagement()}
-                    {adminTab === 3 && renderTeachersManagement()}
-                  </Box>
-                </>
-              )}
-            </Box>
-          </Paper>
-        </>
-      )}
+              <Box sx={{ bgcolor: 'grey.50', p: 2, borderRadius: 1 }}>
+                <Tabs
+                  value={allocationSubTab}
+                  onChange={handleAllocationSubTabChange}
+                  variant="fullWidth"
+                  sx={{
+                    '& .MuiTab-root': { minHeight: 48 },
+                    '& .MuiTabs-indicator': { height: 3 }
+                  }}
+                >
+                  <Tab
+                    label="Room Allocations"
+                    icon={<MeetingRoom />}
+                    iconPosition="start"
+                  />
+                  <Tab
+                    label="Teacher Assignments"
+                    icon={<Group />}
+                    iconPosition="start"
+                  />
+                  <Tab
+                    label="Duty Analysis"
+                    icon={<Assessment />}
+                    iconPosition="start"
+                  />
+                </Tabs>
+              </Box>
+              <Box sx={{ mt: 3, p: 2 }}>
+                {allocationSubTab === 0 && renderRoomAllocations()}
+                {allocationSubTab === 1 && renderTeacherAssignments()}
+                {allocationSubTab === 2 && renderTeacherDutyLoad()}
+              </Box>
+            </>
+          )}
+          {activeTab === 1 && (
+            <>
+              <Box sx={{ bgcolor: 'grey.50', p: 2, borderRadius: 1 }}>
+                <Tabs
+                  value={adminTab}
+                  onChange={handleAdminTabChange}
+                  variant="fullWidth"
+                  sx={{
+                    '& .MuiTab-root': { minHeight: 48 },
+                    '& .MuiTabs-indicator': { height: 3 }
+                  }}
+                >
+                  <Tab
+                    label="Branches"
+                    icon={<School />}
+                    iconPosition="start"
+                  />
+                  <Tab
+                    label="Rooms"
+                    icon={<MeetingRoom />}
+                    iconPosition="start"
+                  />
+                  <Tab
+                    label="Exams"
+                    icon={<EventNote />}
+                    iconPosition="start"
+                  />
+                  <Tab
+                    label="Teachers"
+                    icon={<Group />}
+                    iconPosition="start"
+                  />
+                </Tabs>
+              </Box>
+              <Box sx={{ mt: 3, p: 2 }}>
+                {adminTab === 0 && renderBranchesManagement()}
+                {adminTab === 1 && renderRoomsManagement()}
+                {adminTab === 2 && renderExamsManagement()}
+                {adminTab === 3 && renderTeachersManagement()}
+              </Box>
+            </>
+          )}
+        </Box>
+      </Paper>
 
 
       <Snackbar

@@ -1,0 +1,41 @@
+functionsDirectory = "c:\\Users\\Devraj\\Downloads\\exam-room-allocation\\exam-room-allocation\\netlify\\functions"
+functionsDirectoryOrigin = "config-v1"
+redirectsOrigin = "config"
+plugins = []
+headers = []
+
+[build]
+publish = "c:\\Users\\Devraj\\Downloads\\exam-room-allocation\\exam-room-allocation\\frontend\\build"
+publishOrigin = "config"
+functions = "c:\\Users\\Devraj\\Downloads\\exam-room-allocation\\exam-room-allocation\\netlify\\functions"
+
+[build.environment]
+NODE_VERSION = "18"
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
+
+[functions]
+
+[functions."*"]
+
+[[redirects]]
+from = "/api/*"
+to = "/.netlify/functions/:splat"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]

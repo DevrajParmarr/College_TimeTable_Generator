@@ -1,0 +1,28 @@
+plugins = []
+headers = []
+redirects = []
+
+[functions]
+
+[functions."*"]
+
+[build]
+publish = "c:\\Users\\Devraj\\Downloads\\exam-room-allocation\\exam-room-allocation\\frontend\\build"
+publishOrigin = "ui"
+commandOrigin = "ui"
+base = "c:\\Users\\Devraj\\Downloads\\exam-room-allocation\\exam-room-allocation\\frontend"
+command = "npm run build"
+
+[build.environment]
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
