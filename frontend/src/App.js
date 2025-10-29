@@ -65,6 +65,39 @@ import {
 import axios from 'axios';
 import './App.css';
 
+// localStorage keys for persistence
+const STORAGE_KEYS = {
+  branches: 'examAlloc_branches',
+  rooms: 'examAlloc_rooms',
+  exams: 'examAlloc_exams',
+  teachers: 'examAlloc_teachers'
+};
+
+// Helper function to save data to localStorage
+const saveToStorage = (key, data) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (error) {
+    console.error('Failed to save to localStorage:', error);
+  }
+};
+
+// Helper function to load data from localStorage with validation
+const loadFromStorage = (key) => {
+  try {
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load from localStorage:', error);
+  }
+  return null;
+};
+
 function App() {
   const [allocationData, setAllocationData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -118,7 +151,7 @@ function App() {
   const [sortOrder, setSortOrder] = useState('asc');
   const [sortBy, setSortBy] = useState('');
 
-  const API_BASE_URL = process.env.REACT_APP_API_URL || '/.netlify/functions/api';
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
   const fetchAllocation = async () => {
     setLoading(true);
@@ -146,12 +179,33 @@ function App() {
         axios.get(`${API_BASE_URL}/exams`),
         axios.get(`${API_BASE_URL}/teachers`)
       ]);
-      setBranches(branchesRes.data);
-      setRooms(roomsRes.data);
-      setExams(examsRes.data);
-      setTeachers(teachersRes.data);
+      const newBranches = branchesRes.data;
+      const newRooms = roomsRes.data;
+      const newExams = examsRes.data;
+      const newTeachers = teachersRes.data;
+
+      setBranches(newBranches);
+      setRooms(newRooms);
+      setExams(newExams);
+      setTeachers(newTeachers);
+
+      // Save to localStorage after successful fetch
+      saveToStorage(STORAGE_KEYS.branches, newBranches);
+      saveToStorage(STORAGE_KEYS.rooms, newRooms);
+      saveToStorage(STORAGE_KEYS.exams, newExams);
+      saveToStorage(STORAGE_KEYS.teachers, newTeachers);
     } catch (err) {
       console.error('Failed to fetch admin data:', err);
+      // Load from localStorage as fallback
+      const storedBranches = loadFromStorage(STORAGE_KEYS.branches);
+      const storedRooms = loadFromStorage(STORAGE_KEYS.rooms);
+      const storedExams = loadFromStorage(STORAGE_KEYS.exams);
+      const storedTeachers = loadFromStorage(STORAGE_KEYS.teachers);
+
+      if (storedBranches) setBranches(storedBranches);
+      if (storedRooms) setRooms(storedRooms);
+      if (storedExams) setExams(storedExams);
+      if (storedTeachers) setTeachers(storedTeachers);
     }
   };
 
@@ -172,7 +226,7 @@ function App() {
       try {
         await axios.delete(`${API_BASE_URL}/branches/${id}`);
         setSnackbar({ open: true, message: 'Branch deleted successfully!', severity: 'success' });
-        fetchAdminData();
+        await fetchAdminData(); // Refresh data and save to localStorage
       } catch (err) {
         console.error('Failed to delete branch:', err);
         setSnackbar({ open: true, message: 'Failed to delete branch', severity: 'error' });
@@ -190,7 +244,7 @@ function App() {
         setSnackbar({ open: true, message: 'Branch added successfully!', severity: 'success' });
       }
       setBranchDialogOpen(false);
-      fetchAdminData();
+      await fetchAdminData(); // Refresh data and save to localStorage
     } catch (err) {
       console.error('Failed to save branch:', err);
       setSnackbar({ open: true, message: 'Failed to save branch', severity: 'error' });
@@ -214,7 +268,7 @@ function App() {
       try {
         await axios.delete(`${API_BASE_URL}/rooms/${id}`);
         setSnackbar({ open: true, message: 'Room deleted successfully!', severity: 'success' });
-        fetchAdminData();
+        await fetchAdminData(); // Refresh data and save to localStorage
       } catch (err) {
         console.error('Failed to delete room:', err);
         setSnackbar({ open: true, message: 'Failed to delete room', severity: 'error' });
@@ -233,7 +287,7 @@ function App() {
         setSnackbar({ open: true, message: 'Room added successfully!', severity: 'success' });
       }
       setRoomDialogOpen(false);
-      fetchAdminData();
+      await fetchAdminData(); // Refresh data and save to localStorage
     } catch (err) {
       console.error('Failed to save room:', err);
       setSnackbar({ open: true, message: 'Failed to save room', severity: 'error' });
@@ -277,7 +331,7 @@ function App() {
       try {
         await axios.delete(`${API_BASE_URL}/exams/${id}`);
         setSnackbar({ open: true, message: 'Exam deleted successfully!', severity: 'success' });
-        fetchAdminData();
+        await fetchAdminData(); // Refresh data and save to localStorage
       } catch (err) {
         console.error('Failed to delete exam:', err);
         setSnackbar({ open: true, message: 'Failed to delete exam', severity: 'error' });
@@ -300,7 +354,7 @@ function App() {
         setSnackbar({ open: true, message: 'Exam added successfully!', severity: 'success' });
       }
       setExamDialogOpen(false);
-      fetchAdminData();
+      await fetchAdminData(); // Refresh data and save to localStorage
     } catch (err) {
       console.error('Failed to save exam:', err);
       setSnackbar({ open: true, message: 'Failed to save exam', severity: 'error' });
@@ -344,7 +398,7 @@ function App() {
       try {
         await axios.delete(`${API_BASE_URL}/teachers/${id}`);
         setSnackbar({ open: true, message: 'Teacher deleted successfully!', severity: 'success' });
-        fetchAdminData();
+        await fetchAdminData(); // Refresh data and save to localStorage
       } catch (err) {
         console.error('Failed to delete teacher:', err);
         setSnackbar({ open: true, message: 'Failed to delete teacher', severity: 'error' });
@@ -362,7 +416,7 @@ function App() {
         setSnackbar({ open: true, message: 'Teacher added successfully!', severity: 'success' });
       }
       setTeacherDialogOpen(false);
-      fetchAdminData();
+      await fetchAdminData(); // Refresh data and save to localStorage
     } catch (err) {
       console.error('Failed to save teacher:', err);
       setSnackbar({ open: true, message: 'Failed to save teacher', severity: 'error' });
