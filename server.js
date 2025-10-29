@@ -1,138 +1,196 @@
 const express = require('express');
 const cors = require('cors');
+const connectDB = require('./config/database');
 const { allocateRooms } = require('./utils/roomAllocationEngine');
 const { allocateTeacherDuties } = require('./utils/teacherAllocationEngine');
-let branches = require('./data/branches');
-let rooms = require('./data/rooms');
-let exams = require('./data/exams');
-let teachers = require('./data/teachers');
+
+// Import models
+const Branch = require('./models/Branch');
+const Room = require('./models/Room');
+const Exam = require('./models/Exam');
+const Teacher = require('./models/Teacher');
+const TeacherLeave = require('./models/TeacherLeave');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Connect to MongoDB
+connectDB();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // API Routes
-app.get('/api/branches', (req, res) => {
-  res.json(branches);
+app.get('/api/branches', async (req, res) => {
+  try {
+    const branches = await Branch.find();
+    res.json(branches);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.get('/api/rooms', (req, res) => {
-  res.json(rooms);
+app.get('/api/rooms', async (req, res) => {
+  try {
+    const rooms = await Room.find();
+    res.json(rooms);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.get('/api/exams', (req, res) => {
-  res.json(exams);
+app.get('/api/exams', async (req, res) => {
+  try {
+    const exams = await Exam.find();
+    res.json(exams);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.get('/api/teachers', (req, res) => {
-  res.json(teachers);
+app.get('/api/teachers', async (req, res) => {
+  try {
+    const teachers = await Teacher.find();
+    res.json(teachers);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // CRUD for branches
-app.post('/api/branches', (req, res) => {
-  const newBranch = req.body;
-  const maxId = branches.length > 0 ? Math.max(...branches.map(b => parseInt(b.id))) : 0;
-  newBranch.id = (maxId + 1).toString();
-  branches.push(newBranch);
-  res.status(201).json(newBranch);
+app.post('/api/branches', async (req, res) => {
+  try {
+    const branch = new Branch(req.body);
+    await branch.save();
+    res.status(201).json(branch);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-app.put('/api/branches/:id', (req, res) => {
-  const { id } = req.params;
-  const index = branches.findIndex(b => b.id === id);
-  if (index === -1) return res.status(404).json({ error: 'Branch not found' });
-  branches[index] = { ...branches[index], ...req.body };
-  res.json(branches[index]);
+app.put('/api/branches/:id', async (req, res) => {
+  try {
+    const branch = await Branch.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!branch) return res.status(404).json({ error: 'Branch not found' });
+    res.json(branch);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-app.delete('/api/branches/:id', (req, res) => {
-  const { id } = req.params;
-  const index = branches.findIndex(b => b.id === id);
-  if (index === -1) return res.status(404).json({ error: 'Branch not found' });
-  branches.splice(index, 1);
-  res.status(204).send();
+app.delete('/api/branches/:id', async (req, res) => {
+  try {
+    const branch = await Branch.findByIdAndDelete(req.params.id);
+    if (!branch) return res.status(404).json({ error: 'Branch not found' });
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // CRUD for rooms
-app.post('/api/rooms', (req, res) => {
-  const newRoom = req.body;
-  const maxId = rooms.length > 0 ? Math.max(...rooms.map(r => parseInt(r.id))) : 0;
-  newRoom.id = (maxId + 1).toString();
-  rooms.push(newRoom);
-  res.status(201).json(newRoom);
+app.post('/api/rooms', async (req, res) => {
+  try {
+    const room = new Room(req.body);
+    await room.save();
+    res.status(201).json(room);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-app.put('/api/rooms/:id', (req, res) => {
-  const { id } = req.params;
-  const index = rooms.findIndex(r => r.id === id);
-  if (index === -1) return res.status(404).json({ error: 'Room not found' });
-  rooms[index] = { ...rooms[index], ...req.body };
-  res.json(rooms[index]);
+app.put('/api/rooms/:id', async (req, res) => {
+  try {
+    const room = await Room.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!room) return res.status(404).json({ error: 'Room not found' });
+    res.json(room);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-app.delete('/api/rooms/:id', (req, res) => {
-  const { id } = req.params;
-  const index = rooms.findIndex(r => r.id === id);
-  if (index === -1) return res.status(404).json({ error: 'Room not found' });
-  rooms.splice(index, 1);
-  res.status(204).send();
+app.delete('/api/rooms/:id', async (req, res) => {
+  try {
+    const room = await Room.findByIdAndDelete(req.params.id);
+    if (!room) return res.status(404).json({ error: 'Room not found' });
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // CRUD for exams
-app.post('/api/exams', (req, res) => {
-  const newExam = req.body;
-  const maxId = exams.length > 0 ? Math.max(...exams.map(e => parseInt(e.id))) : 0;
-  newExam.id = (maxId + 1).toString();
-  exams.push(newExam);
-  res.status(201).json(newExam);
+app.post('/api/exams', async (req, res) => {
+  try {
+    const exam = new Exam(req.body);
+    await exam.save();
+    res.status(201).json(exam);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-app.put('/api/exams/:id', (req, res) => {
-  const { id } = req.params;
-  const index = exams.findIndex(e => e.id === id);
-  if (index === -1) return res.status(404).json({ error: 'Exam not found' });
-  exams[index] = { ...exams[index], ...req.body };
-  res.json(exams[index]);
+app.put('/api/exams/:id', async (req, res) => {
+  try {
+    const exam = await Exam.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+    res.json(exam);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-app.delete('/api/exams/:id', (req, res) => {
-  const { id } = req.params;
-  const index = exams.findIndex(e => e.id === id);
-  if (index === -1) return res.status(404).json({ error: 'Exam not found' });
-  exams.splice(index, 1);
-  res.status(204).send();
+app.delete('/api/exams/:id', async (req, res) => {
+  try {
+    const exam = await Exam.findByIdAndDelete(req.params.id);
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // CRUD for teachers
-app.post('/api/teachers', (req, res) => {
-  const newTeacher = req.body;
-  const maxId = teachers.length > 0 ? Math.max(...teachers.map(t => parseInt(t.id))) : 0;
-  newTeacher.id = (maxId + 1).toString();
-  teachers.push(newTeacher);
-  res.status(201).json(newTeacher);
-});
-
-app.put('/api/teachers/:id', (req, res) => {
-  const { id } = req.params;
-  const index = teachers.findIndex(t => t.id === id);
-  if (index === -1) return res.status(404).json({ error: 'Teacher not found' });
-  teachers[index] = { ...teachers[index], ...req.body };
-  res.json(teachers[index]);
-});
-
-app.delete('/api/teachers/:id', (req, res) => {
-  const { id } = req.params;
-  const index = teachers.findIndex(t => t.id === id);
-  if (index === -1) return res.status(404).json({ error: 'Teacher not found' });
-  teachers.splice(index, 1);
-  res.status(204).send();
-});
-
-app.post('/api/allocate', (req, res) => {
+app.post('/api/teachers', async (req, res) => {
   try {
+    const teacher = new Teacher(req.body);
+    await teacher.save();
+    res.status(201).json(teacher);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.put('/api/teachers/:id', async (req, res) => {
+  try {
+    const teacher = await Teacher.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
+    res.json(teacher);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.delete('/api/teachers/:id', async (req, res) => {
+  try {
+    const teacher = await Teacher.findByIdAndDelete(req.params.id);
+    if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/allocate', async (req, res) => {
+  try {
+    // Fetch data from MongoDB
+    const [rooms, exams, teachers] = await Promise.all([
+      Room.find(),
+      Exam.find(),
+      Teacher.find()
+    ]);
+
     // Reset teacher assignments before new allocation
     teachers.forEach(t => {
       t.assignedDuties = [];
@@ -153,7 +211,7 @@ app.post('/api/allocate', (req, res) => {
 
     // Step 4: Calculate teacher duty load
     const teacherDutyLoad = teachers.map(t => ({
-      id: t.id,
+      id: t._id.toString(),
       name: t.name,
       dutiesAssigned: t.assignedDuties?.length || 0,
       experience: t.experience
