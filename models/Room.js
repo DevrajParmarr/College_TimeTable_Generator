@@ -21,4 +21,14 @@ const roomSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Virtual for id to match frontend expectations
+roomSchema.virtual('id').get(function() {
+  return this._id.toHexString();
+});
+
+// Ensure virtual fields are serialized
+roomSchema.set('toJSON', {
+  virtuals: true
+});
+
 module.exports = mongoose.model('Room', roomSchema);

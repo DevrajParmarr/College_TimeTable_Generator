@@ -73,6 +73,11 @@ const STORAGE_KEYS = {
   teachers: 'examAlloc_teachers'
 };
 
+// Helper function to generate sequential IDs for display
+const generateSequentialId = (index, prefix = '') => {
+  return `${prefix}${(index + 1).toString().padStart(3, '0')}`;
+};
+
 // Helper function to save data to localStorage
 const saveToStorage = (key, data) => {
   try {
@@ -685,7 +690,11 @@ function App() {
         } else {
           return bVal.localeCompare(aVal);
         }
-      });
+      })
+      .map((branch, index) => ({
+        ...branch,
+        displayId: generateSequentialId(index, 'B')
+      }));
 
     return (
       <Box>
@@ -760,7 +769,7 @@ function App() {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((branch) => (
                 <TableRow key={branch.id} hover sx={{ '&:hover': { bgcolor: 'grey.50' } }}>
-                  <TableCell>{branch.id}</TableCell>
+                  <TableCell>{branch.displayId}</TableCell>
                   <TableCell sx={{ fontWeight: 'medium' }}>{branch.name}</TableCell>
                   <TableCell>
                     <Chip label={branch.code} color="secondary" size="small" />
@@ -869,7 +878,11 @@ function App() {
         } else {
           return aVal < bVal ? 1 : -1;
         }
-      });
+      })
+      .map((exam, index) => ({
+        ...exam,
+        displayId: generateSequentialId(index, 'E')
+      }));
 
     return (
       <Box>
@@ -960,7 +973,7 @@ function App() {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((exam) => (
                 <TableRow key={exam.id} hover sx={{ '&:hover': { bgcolor: 'grey.50' } }}>
-                  <TableCell>{exam.id}</TableCell>
+                  <TableCell>{exam.displayId}</TableCell>
                   <TableCell sx={{ fontWeight: 'medium' }}>{exam.name}</TableCell>
                   <TableCell>
                     <Chip label={exam.department} color="secondary" size="small" />
@@ -1169,7 +1182,11 @@ function App() {
             return bVal.localeCompare(aVal);
           }
         }
-      });
+      })
+      .map((teacher, index) => ({
+        ...teacher,
+        displayId: generateSequentialId(index, 'T')
+      }));
 
     return (
       <Box>
@@ -1271,7 +1288,7 @@ function App() {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((teacher) => (
                 <TableRow key={teacher.id} hover sx={{ '&:hover': { bgcolor: 'grey.50' } }}>
-                  <TableCell>{teacher.id}</TableCell>
+                  <TableCell>{teacher.displayId}</TableCell>
                   <TableCell sx={{ fontWeight: 'medium' }}>{teacher.name}</TableCell>
                   <TableCell sx={{ fontSize: '0.875rem' }}>{teacher.email}</TableCell>
                   <TableCell>
@@ -1454,7 +1471,11 @@ function App() {
         } else {
           return aVal < bVal ? 1 : -1;
         }
-      });
+      })
+      .map((room, index) => ({
+        ...room,
+        displayId: generateSequentialId(index, 'R')
+      }));
 
     return (
       <Box>
@@ -1542,7 +1563,7 @@ function App() {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((room) => (
                 <TableRow key={room.id} hover sx={{ '&:hover': { bgcolor: 'grey.50' } }}>
-                  <TableCell>{room.id}</TableCell>
+                  <TableCell>{room.displayId}</TableCell>
                   <TableCell sx={{ fontWeight: 'medium' }}>{room.name}</TableCell>
                   <TableCell>
                     <Chip

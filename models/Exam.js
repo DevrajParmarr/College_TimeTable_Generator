@@ -46,4 +46,14 @@ const examSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Virtual for id to match frontend expectations
+examSchema.virtual('id').get(function() {
+  return this._id.toHexString();
+});
+
+// Ensure virtual fields are serialized
+examSchema.set('toJSON', {
+  virtuals: true
+});
+
 module.exports = mongoose.model('Exam', examSchema);

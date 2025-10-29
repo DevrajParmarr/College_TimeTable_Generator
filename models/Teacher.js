@@ -58,4 +58,14 @@ const teacherSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Virtual for id to match frontend expectations
+teacherSchema.virtual('id').get(function() {
+  return this._id.toHexString();
+});
+
+// Ensure virtual fields are serialized
+teacherSchema.set('toJSON', {
+  virtuals: true
+});
+
 module.exports = mongoose.model('Teacher', teacherSchema);
